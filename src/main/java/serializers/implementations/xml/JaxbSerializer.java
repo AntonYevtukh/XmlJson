@@ -1,6 +1,6 @@
-package marshallers.implementations.xml;
+package serializers.implementations.xml;
 
-import marshallers.interfaces.XmlMarshaller;
+import serializers.interfaces.XmlSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,33 +8,33 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import java.io.File;
+import java.io.*;
 
-public class JaxbMarshaller implements XmlMarshaller {
+public class JaxbSerializer implements XmlSerializer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JaxbMarshaller.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JaxbSerializer.class);
 
     @Override
-    public <E> void marshall(E entity, String fileName) {
-        try {
-            File file = new File(fileName);
-            file.getParentFile().mkdirs();
+    public <E> String serialize(E entity) throws IOException {
+        String result = null;
+        try (Writer writer = new BufferedWriter(new StringWriter())){
             JAXBContext jaxbContext = JAXBContext.newInstance(entity.getClass());
             Marshaller marshaller = jaxbContext.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            marshaller.marshal(entity, file);
+            marshaller.marshal(entity, writer);
+            result = writer.toString();
         } catch (JAXBException e) {
             LOGGER.error(e.getMessage(), e);
         }
+        return result;
     }
 
     @Override
-    public <E> E unmarshall(Class<E> classToken, String fileName) {
-        try {
-            File file = new File(fileName);
+    public <E> E deserialize(Class<E> classToken, String fileBody) throws IOException {
+        try (Reader reader = new BufferedReader(new StringReader(fileBody))){
             JAXBContext jaxbContext = JAXBContext.newInstance(classToken);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            return (E)unmarshaller.unmarshal(file);
+            return (E)unmarshaller.unmarshal(reader);
         } catch (JAXBException e) {
             LOGGER.error(e.getMessage(), e);
             return null;

@@ -1,13 +1,16 @@
 import entities.Catalog;
 import entities.CurrencyRate;
-import marshallers.implementations.json.GsonMarshaller;
-import marshallers.implementations.json.JacksonMarshaller;
-import marshallers.implementations.xml.JaxbMarshaller;
-import marshallers.interfaces.JsonMarshaller;
-import marshallers.interfaces.XmlMarshaller;
+import entities.Person;
+import serializers.implementations.json.GsonSerializer;
+import serializers.implementations.json.JacksonSerializer;
+import serializers.implementations.xml.DomSerializer;
+import serializers.implementations.xml.JaxbSerializer;
+import serializers.interfaces.JsonSerializer;
+import serializers.interfaces.XmlSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import url.ResponseSaver;
+import utils.FileUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,19 +28,21 @@ public class Runner {
     private static final Set<String> CURRENCY_CODES = Set.of("USD", "EUR", "RUB");
 
     public static void main(String[] args) {
-        /*LOGGER.info("JSON demo using GSON:");
-        jsonDemo(new GsonMarshaller());
-        LOGGER.info("JSON demo using Jackson:");
-        jsonDemo(new JacksonMarshaller());*/
-        xmlDemo(new JaxbMarshaller());
+        //LOGGER.info("JSON demo using GSON:");
+        //jsonDemo(new GsonSerializer());
+        //LOGGER.info("JSON demo using Jackson:");
+        //jsonDemo(new JacksonSerializer());
+        xmlDemo(new DomSerializer());
     }
 
-    private static void jsonDemo(JsonMarshaller jsonMarshaller) {
+    private static void jsonDemo(JsonSerializer jsonSerializer) {
         ResponseSaver responseSaver = new ResponseSaver();
+        FileUtil fileUtil = new FileUtil();
         try {
             responseSaver.saveResponse(URL_STRING, JSON_FILE_NAME);
+            String tempString = fileUtil.readFromFile(JSON_FILE_NAME);
             List<CurrencyRate> currencyRates = Arrays.asList(
-                    jsonMarshaller.unmarshall(CurrencyRate[].class, JSON_FILE_NAME));
+                    jsonSerializer.deserialize(CurrencyRate[].class, tempString));
             currencyRates = currencyRates.stream().filter(
                     (CurrencyRate currencyRate) -> CURRENCY_CODES.contains(currencyRate.getCc())).
                     collect(Collectors.toList());
@@ -47,8 +52,19 @@ public class Runner {
         }
     }
 
-    private static void xmlDemo(XmlMarshaller xmlMarshaller) {
-        Catalog catalog = xmlMarshaller.unmarshall(Catalog.class, XML_FILE_NAME);
-        LOGGER.info(catalog.toString());
+    private static void xmlDemo(XmlSerializer xmlSerializer) {
+        FileUtil fileUtil = new FileUtil();
+        String tempString = fileUtil.readFromFile(XML_FILE_NAME);
+        try {
+            Catalog catalog = xmlSerializer.deserialize(Catalog.class, tempString);
+            List<Person> personList = catalog.getNotebook().getPersons();
+            Person person1 = new Person(4, "Ccc", "Kyiv", 15000, "ee");
+            personList.add(person1);
+            catalog.getNotebook().setPersons(personList);
+            fileUtil.writeToFile(xmlSerializer.serialize(catalog), XML_FILE_NAME);
+            LOGGER.info(catalog.toString());
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
     }
 }
