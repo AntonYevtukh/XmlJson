@@ -1,4 +1,4 @@
 package serializers.interfaces;
 
-public interface JsonSerializer extends Serializer {
+public interface JsonSerializer<E> extends Serializer<E> {
 }

@@ -2,8 +2,8 @@ package serializers.interfaces;
 
 import java.io.IOException;
 
-public interface Serializer {
+public interface Serializer<E> {
 
-    public <E> String serialize(E entity) throws IOException;
-    public <E> E deserialize(Class<E> classToken, String fileBody) throws IOException;
+    String serialize(E entity) throws IOException;
+    E deserialize(Class<E> classToken, String fileBody) throws IOException;
 }

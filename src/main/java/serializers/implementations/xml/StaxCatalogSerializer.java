@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 import serializers.interfaces.XmlSerializer;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -18,9 +19,9 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DomSerializer implements XmlSerializer {
+public class StaxCatalogSerializer implements XmlSerializer<Catalog> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DomSerializer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StaxCatalogSerializer.class);
     private static DocumentBuilder documentBuilder;
     private static Transformer transformer;
 
@@ -37,11 +38,7 @@ public class DomSerializer implements XmlSerializer {
     }
 
     @Override
-    public <E> String serialize(E entity) throws IOException {
-        if (!entity.getClass().equals(Catalog.class)) {
-            throw new RuntimeException("Not supported entity");
-        }
-        Catalog catalog = (Catalog) entity;
+    public String serialize(Catalog catalog) throws IOException {
         Document document = documentBuilder.newDocument();
         Element catalogElement = document.createElement("catalog");
         document.appendChild(catalogElement);
@@ -62,9 +59,7 @@ public class DomSerializer implements XmlSerializer {
     }
 
     @Override
-    public <E> E deserialize(Class<E> classToken, String fileBody) throws IOException {
-        if (!classToken.equals(Catalog.class))
-            throw new RuntimeException("Not supported entity");
+    public Catalog deserialize(Class<Catalog> classToken, String fileBody) throws IOException {
         try (InputStream inputStream = new BufferedInputStream(new ByteArrayInputStream(fileBody.getBytes()))) {
             Document document = documentBuilder.parse(inputStream);
             document.getDocumentElement().normalize();
@@ -83,7 +78,7 @@ public class DomSerializer implements XmlSerializer {
             }
             Notebook notebook = new Notebook(personList);
             Catalog catalog = new Catalog(notebook);
-            return (E) catalog;
+            return catalog;
         } catch (SAXException e) {
             LOGGER.error(e.getMessage(), e);
             throw new RuntimeException("Cannot parse document");

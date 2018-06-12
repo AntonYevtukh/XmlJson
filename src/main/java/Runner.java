@@ -3,7 +3,7 @@ import entities.CurrencyRate;
 import entities.Person;
 import serializers.implementations.json.GsonSerializer;
 import serializers.implementations.json.JacksonSerializer;
-import serializers.implementations.xml.DomSerializer;
+import serializers.implementations.xml.DomCatalogSerializer;
 import serializers.implementations.xml.JaxbSerializer;
 import serializers.interfaces.JsonSerializer;
 import serializers.interfaces.XmlSerializer;
@@ -28,14 +28,17 @@ public class Runner {
     private static final Set<String> CURRENCY_CODES = Set.of("USD", "EUR", "RUB");
 
     public static void main(String[] args) {
-        //LOGGER.info("JSON demo using GSON:");
-        //jsonDemo(new GsonSerializer());
-        //LOGGER.info("JSON demo using Jackson:");
-        //jsonDemo(new JacksonSerializer());
-        xmlDemo(new DomSerializer());
+        LOGGER.info("JSON demo using GSON:");
+        jsonDemo(new GsonSerializer<>());
+        LOGGER.info("JSON demo using Jackson:");
+        jsonDemo(new JacksonSerializer<>());
+        LOGGER.info("XML demo using DOM parser");
+        xmlDemo(new DomCatalogSerializer());
+        LOGGER.info("XML demo using JAXB parser");
+        xmlDemo(new JaxbSerializer<>());
     }
 
-    private static void jsonDemo(JsonSerializer jsonSerializer) {
+    private static void jsonDemo(JsonSerializer<CurrencyRate[]> jsonSerializer) {
         ResponseSaver responseSaver = new ResponseSaver();
         FileUtil fileUtil = new FileUtil();
         try {
@@ -52,7 +55,7 @@ public class Runner {
         }
     }
 
-    private static void xmlDemo(XmlSerializer xmlSerializer) {
+    private static void xmlDemo(XmlSerializer<Catalog> xmlSerializer) {
         FileUtil fileUtil = new FileUtil();
         String tempString = fileUtil.readFromFile(XML_FILE_NAME);
         try {

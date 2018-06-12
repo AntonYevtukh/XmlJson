@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 
-public class JacksonSerializer implements JsonSerializer {
+public class JacksonSerializer<E> implements JsonSerializer<E> {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final Logger LOGGER = LoggerFactory.getLogger(GsonSerializer.class);
@@ -21,7 +21,7 @@ public class JacksonSerializer implements JsonSerializer {
     }
 
     @Override
-    public <E> String serialize(E entity) throws IOException {
+    public String serialize(E entity) throws IOException {
         String result = null;
         try (Writer writer = new BufferedWriter(new StringWriter())) {
             OBJECT_MAPPER.writeValue(writer, entity);
@@ -32,7 +32,7 @@ public class JacksonSerializer implements JsonSerializer {
     }
 
     @Override
-    public <E> E deserialize(Class<E> classToken, String fileBody) throws IOException {
+    public E deserialize(Class<E> classToken, String fileBody) throws IOException {
        return OBJECT_MAPPER.readValue(fileBody, classToken);
     }
 }

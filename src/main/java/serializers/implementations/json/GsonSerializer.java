@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 
-public class GsonSerializer implements JsonSerializer {
+public class GsonSerializer<E> implements JsonSerializer<E> {
 
     private static final Gson GSON;
     private static final Logger LOGGER = LoggerFactory.getLogger(GsonSerializer.class);
@@ -26,12 +26,12 @@ public class GsonSerializer implements JsonSerializer {
     }
 
     @Override
-    public <E> String serialize(E entity) {
+    public String serialize(E entity) {
         return GSON.toJson(entity);
     }
 
     @Override
-    public <E> E deserialize(Class<E> classToken, String fileBody) {
+    public E deserialize(Class<E> classToken, String fileBody) {
         return GSON.fromJson(fileBody, classToken);
     }
 }

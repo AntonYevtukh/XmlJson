@@ -10,12 +10,12 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.io.*;
 
-public class JaxbSerializer implements XmlSerializer {
+public class JaxbSerializer<E> implements XmlSerializer<E> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JaxbSerializer.class);
 
     @Override
-    public <E> String serialize(E entity) throws IOException {
+    public String serialize(E entity) throws IOException {
         String result = null;
         try (Writer writer = new BufferedWriter(new StringWriter())){
             JAXBContext jaxbContext = JAXBContext.newInstance(entity.getClass());
@@ -30,7 +30,7 @@ public class JaxbSerializer implements XmlSerializer {
     }
 
     @Override
-    public <E> E deserialize(Class<E> classToken, String fileBody) throws IOException {
+    public E deserialize(Class<E> classToken, String fileBody) throws IOException {
         try (Reader reader = new BufferedReader(new StringReader(fileBody))){
             JAXBContext jaxbContext = JAXBContext.newInstance(classToken);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
