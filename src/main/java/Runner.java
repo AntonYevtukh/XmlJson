@@ -23,7 +23,8 @@ public class Runner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Runner.class);
     private static final String URL_STRING = "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json";
-    private static final String XML_FILE_NAME = new File("").getAbsolutePath() + "\\src\\main\\resources\\catalog.xml";
+    private static final String XML_INPUT_FILE_NAME = new File("").getAbsolutePath() + "\\src\\main\\resources\\catalog_input.xml";
+    private static final String XML_OUTPUT_FILE_NAME = new File("").getAbsolutePath() + "\\src\\main\\resources\\catalog_output.xml";
     private static final String JSON_FILE_NAME = new File("").getAbsolutePath() + "\\src\\main\\resources\\currencies.json";
     private static final Set<String> CURRENCY_CODES = Set.of("USD", "EUR", "RUB");
 
@@ -57,15 +58,21 @@ public class Runner {
 
     private static void xmlDemo(XmlSerializer<Catalog> xmlSerializer) {
         FileUtil fileUtil = new FileUtil();
-        String tempString = fileUtil.readFromFile(XML_FILE_NAME);
+        String tempString = fileUtil.readFromFile(XML_INPUT_FILE_NAME);
         try {
             Catalog catalog = xmlSerializer.deserialize(Catalog.class, tempString);
             List<Person> personList = catalog.getNotebook().getPersons();
-            Person person1 = new Person(4, "Ccc", "Kyiv", 15000, "ee");
+            Person person1 = new Person(4, "Ddd", "Kyiv", 15000, "ee");
+            Person person2 = new Person(5, "Eee", "Lviv", 12000, "ee");
             personList.add(person1);
+            personList.add(person2);
             catalog.getNotebook().setPersons(personList);
-            fileUtil.writeToFile(xmlSerializer.serialize(catalog), XML_FILE_NAME);
-            LOGGER.info(catalog.toString());
+            fileUtil.writeToFile(xmlSerializer.serialize(catalog), XML_OUTPUT_FILE_NAME);
+            List<Person> filteredPersonList = personList.stream().
+                    filter((Person p) -> p.getCash() >= 10000).collect(Collectors.toList());
+            LOGGER.info("List of Person, that has >= 10000 of cash");
+            LOGGER.info(filteredPersonList.toString());
+
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
         }

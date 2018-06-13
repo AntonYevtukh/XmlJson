@@ -17,12 +17,12 @@ public class JaxbSerializer<E> implements XmlSerializer<E> {
     @Override
     public String serialize(E entity) throws IOException {
         String result = null;
-        try (Writer writer = new BufferedWriter(new StringWriter())){
+        try (StringWriter stringWriter = new StringWriter()){
             JAXBContext jaxbContext = JAXBContext.newInstance(entity.getClass());
             Marshaller marshaller = jaxbContext.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            marshaller.marshal(entity, writer);
-            result = writer.toString();
+            marshaller.marshal(entity, stringWriter);
+            result = stringWriter.getBuffer().toString();
         } catch (JAXBException e) {
             LOGGER.error(e.getMessage(), e);
         }
